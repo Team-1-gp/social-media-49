@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import AppContext from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 
 const socket = io("http://localhost:3000");
 
@@ -8,7 +9,27 @@ export default function HomePage() {
   const { user, posts, setPosts } = useContext(AppContext);
   const [newPost, setNewPost] = useState("");
   const [comment, setComment] = useState("");
+  const [userOnline, setUserOnline] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    socket.auth = {
+      username: localStorage.username,
+    };
+    socket.disconnect().connect();
+  }, []);
+
+  useEffect(() => {
+    socket.on("users", (newUsers) => {
+      setUserOnline(newUsers);
+    });
+
+    return () => {
+      socket.off("users");
+    };
+  }, []);
 
   useEffect(() => {
     socket.on("post", (post) => {
@@ -35,6 +56,7 @@ export default function HomePage() {
       socket.off("post");
       socket.off("comment");
       socket.off("like");
+      socket.off("users");
     };
   }, [setPosts]);
 
@@ -66,8 +88,23 @@ export default function HomePage() {
     socket.emit("like", updatedPost);
   };
 
+  console.log(userOnline);
+
   return (
     <div className="px-40 py-10">
+      {userOnline.map((u) => (
+        <h1 key={u.id}>{u.username}</h1>
+      ))}
+      <div className="text-end">
+        <button
+          onClick={() => {
+            localStorage.clear();
+            navigate("/login");
+          }}
+        >
+          Logout
+        </button>
+      </div>
       <h1 className="text-center text-4xl mb-4">Welcome, {user.username}</h1>
       <div className="mb-4">
         <textarea
