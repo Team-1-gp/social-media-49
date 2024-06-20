@@ -8,11 +8,12 @@ const port = 3000;
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5173/",
   },
 });
 
 let users = [];
+let posts = [];
 
 io.on("connection", (socket) => {
   console.log("New client connected", socket.id);
@@ -27,16 +28,27 @@ io.on("connection", (socket) => {
 
   io.emit("users", users);
 
+  socket.emit("posts", posts);
+
   socket.on("post", (post) => {
-    io.emit("post", post);
+    posts.unshift(post);
+    io.emit("posts", posts);
   });
 
   socket.on("comment", (updatedPost) => {
-    io.emit("comment", updatedPost);
+    const postIndex = posts.findIndex((post) => post.id === updatedPost.id);
+    if (postIndex !== -1) {
+      posts[postIndex] = updatedPost;
+      io.emit("comment", updatedPost);
+    }
   });
 
   socket.on("like", (updatedPost) => {
-    io.emit("like", updatedPost);
+    const postIndex = posts.findIndex((post) => post.id === updatedPost.id);
+    if (postIndex !== -1) {
+      posts[postIndex] = updatedPost;
+      io.emit("like", updatedPost);
+    }
   });
 
   socket.on("disconnect", () => {
