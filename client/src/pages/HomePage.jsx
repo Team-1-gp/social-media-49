@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { GoComment, GoDotFill } from "react-icons/go";
 import { FcLike, FcLikePlaceholder } from "react-icons/fc";
 
-const socket = io("http://localhost:3000");
+const socket = io(import.meta.env.VITE_SERVER_URL);
 
 export default function HomePage() {
   const { user, setUser, posts, setPosts } = useContext(AppContext);
@@ -157,7 +157,7 @@ export default function HomePage() {
             >
               <h3 className="font-semibold text-xl">{post.username}</h3>
               <p>{post.content}</p>
-              <div className="flex">
+              <div className="flex mt-3">
                 <button
                   className="mr-4 flex items-center gap-2"
                   onClick={() => handleLike(post.id)}
@@ -173,7 +173,7 @@ export default function HomePage() {
                   className="flex items-center gap-2"
                   onClick={() => setSelectedPost(post.id)}
                 >
-                  <GoComment /> {post.comments.length}
+                  <GoComment color="pink" /> {post.comments.length}
                 </button>
               </div>
 
