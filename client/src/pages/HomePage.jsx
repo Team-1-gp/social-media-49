@@ -100,16 +100,14 @@ export default function HomePage() {
     socket.emit("like", updatedPost);
   };
 
-  console.log(userOnline);
-
   return (
     <div className="flex min-h-screen">
-      <div className="p-5 bg-primary text-white">
-        <h1 className="text-3xl mb-4">Users Online</h1>
+      <div className="sm:p-5 bg-primary text-white">
+        <h1 className="text-sm  sm:text-3xl mb-4">Users Online</h1>
         {userOnline?.map((u) => (
           <div key={u.id} className="flex items-center">
             <GoDotFill color="blue" />
-            <h1 key={u.id} className="text-xl">
+            <h1 key={u.id} className="text-sm sm:text-xl">
               {u.username}
             </h1>
           </div>
