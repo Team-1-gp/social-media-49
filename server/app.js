@@ -8,7 +8,7 @@ const port = 3000;
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173/",
+    origin: "http://localhost:5173",
   },
 });
 
