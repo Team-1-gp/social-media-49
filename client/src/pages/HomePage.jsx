@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const socket = io("http://localhost:3000");
 
 export default function HomePage() {
-  const { user, posts, setPosts } = useContext(AppContext);
+  const { user, setUser, posts, setPosts } = useContext(AppContext);
   const [newPost, setNewPost] = useState("");
   const [comment, setComment] = useState("");
   const [userOnline, setUserOnline] = useState([]);
@@ -15,6 +15,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    setUser({ username: localStorage.username });
     socket.auth = {
       username: localStorage.username,
     };
@@ -22,19 +23,13 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    socket.on("users", (newUsers) => {
-      setUserOnline(newUsers);
+    socket.on("posts", (posts) => {
+      setPosts(posts);
     });
 
-    return () => {
-      socket.off("users");
-    };
-  }, []);
-
-  useEffect(() => {
-    socket.on("post", (post) => {
-      setPosts((prevPosts) => [...prevPosts, post]);
-    });
+    // socket.on("post", (post) => {
+    //   setPosts((prevPosts) => [...prevPosts, post]);
+    // });
 
     socket.on("comment", (updatedPost) => {
       setPosts((prevPosts) =>
@@ -52,13 +47,18 @@ export default function HomePage() {
       );
     });
 
+    socket.on("users", (newUsers) => {
+      setUserOnline(newUsers);
+    });
+
     return () => {
+      socket.off("posts");
       socket.off("post");
       socket.off("comment");
       socket.off("like");
       socket.off("users");
     };
-  }, [setPosts]);
+  }, []);
 
   const handlePostSubmit = () => {
     const post = {
@@ -92,7 +92,7 @@ export default function HomePage() {
 
   return (
     <div className="px-40 py-10">
-      {userOnline.map((u) => (
+      {userOnline?.map((u) => (
         <h1 key={u.id}>{u.username}</h1>
       ))}
       <div className="text-end">
@@ -123,7 +123,7 @@ export default function HomePage() {
         </div>
       </div>
       <div>
-        {posts.map((post) => (
+        {posts?.map((post) => (
           <div key={post.id} className="border border-black p-4 mb-4">
             <h3 className="font-semibold text-xl">{post.username}</h3>
             <p>{post.content}</p>
@@ -150,7 +150,7 @@ export default function HomePage() {
               </div>
             )}
             <div className="mt-3">
-              {post.comments.map((comment, index) => (
+              {post.comments?.map((comment, index) => (
                 <p key={index}>
                   <strong>{comment.username}</strong>: {comment.content}
                 </p>
